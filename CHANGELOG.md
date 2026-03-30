@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 spec/v2.0.0.html).
 
 
+## [0.0.6] - 2026-03-30
+### Changed
+- `/cars/random` now returns a random make + model from NHTSA instead of just a make.
+- Normalized the response to include `make_name`, `model_name`, and a combined `name`.
+
 ## [0.0.5] - 2026-03-30
 ### Changed
 - Switched the vehicle source to the NHTSA Vehicle API and simplified `/cars/random` responses.

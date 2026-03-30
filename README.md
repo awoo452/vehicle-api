@@ -2,11 +2,12 @@
 
 ## Features
 
-A Ruby on Rails API that fetches a random vehicle make from the NHTSA Vehicle API, logs each request, and can optionally store a subset of the data in PostgreSQL.
+A Ruby on Rails API that fetches a random vehicle model (make + model) from the NHTSA Vehicle API, logs each request, and can optionally store a subset of the data in PostgreSQL.
 
 ### API
 
-`GET /cars/random` returns a random vehicle make payload from the NHTSA Vehicle API.
+`GET /cars/random` returns a random vehicle model payload from the NHTSA Vehicle API.
+Response includes `make_name`, `model_name`, `model_id`, and a combined `name` field.
 
 Example:
 `GET /cars/random`
