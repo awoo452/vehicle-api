@@ -16,7 +16,7 @@ class ApplicationController < ActionController::API
   end
 
   def create_request_log(duration_ms, error)
-    RequestLog.create(
+    attributes = {
       request_id: request.request_id,
       http_method: request.request_method,
       path: request.path,
@@ -25,11 +25,17 @@ class ApplicationController < ActionController::API
       referer: request.referer,
       origin: request.headers["Origin"],
       params: request_log_params,
-      vehicle_id: request_log_vehicle_id,
       status: response&.status || (error ? 500 : nil),
       duration_ms: duration_ms,
       metadata: build_request_log_metadata(error)
-    )
+    }
+
+    vehicle_id = request_log_vehicle_id
+    if vehicle_id.present? && RequestLog.attribute_names.include?("vehicle_id")
+      attributes[:vehicle_id] = vehicle_id
+    end
+
+    RequestLog.create(attributes)
   rescue => log_error
     Rails.logger.warn("RequestLog failed: #{log_error.class}: #{log_error.message}")
   end

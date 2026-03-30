@@ -2,25 +2,14 @@
 
 ## Features
 
-A Ruby on Rails API that fetches a random vehicle from the CarQuery API, logs each request, and can optionally store a subset of the data in PostgreSQL.
+A Ruby on Rails API that fetches a random vehicle make from the NHTSA Vehicle API, logs each request, and can optionally store a subset of the data in PostgreSQL.
 
 ### API
 
-`GET /cars/random` returns a random vehicle payload from the CarQuery API.
-
-Query parameters:
-- `persist=false` skips writing to the database (default persists the car).
-- `fuel_type=gas|diesel|electric` filters the random vehicle by fuel type.
-- `make=toyota|ford|etc` filters the random vehicle by make.
-- `body=sedan|suv|coupe` filters the random vehicle by body style.
-- `year=YYYY` filters the random vehicle by model year (maps to `min_year` and `max_year`).
+`GET /cars/random` returns a random vehicle make payload from the NHTSA Vehicle API.
 
 Example:
-`GET /cars/random?fuel_type=gas&make=toyota`
-
-Side effects (when `persist` is not `false`):
-- Creates or updates a `Vehicle` record with normalized fields and the full `raw_data` payload.
-- Links the request log to the created vehicle via `vehicle_id`.
+`GET /cars/random`
 
 Request logging:
 - All API requests except `GET /up` are logged in the `request_logs` table.

@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 spec/v2.0.0.html).
 
 
+## [0.0.5] - 2026-03-30
+### Changed
+- Switched the vehicle source to the NHTSA Vehicle API and simplified `/cars/random` responses.
+- Avoided request log failures when the shared database hasn't been migrated to `vehicle_id`.
+
 ## [0.0.4] - 2026-03-30
 ### Changed
 - Switched CarQuery requests to HTTP and added upstream error handling for `/cars/random`.
