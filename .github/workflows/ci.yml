@@ -37,7 +37,12 @@ jobs:
           bundler-cache: true
 
       - name: Scan for security vulnerabilities in JavaScript dependencies
+        if: ${{ hashFiles('bin/importmap') != '' }}
         run: bin/importmap audit
+
+      - name: Skip importmap audit (API-only app)
+        if: ${{ hashFiles('bin/importmap') == '' }}
+        run: echo "No bin/importmap found; skipping importmap audit."
 
   lint:
     runs-on: ubuntu-latest
