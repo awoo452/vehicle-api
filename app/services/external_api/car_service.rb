@@ -6,6 +6,7 @@ module ExternalApi
   class CarService
     BASE_URL = "https://vpic.nhtsa.dot.gov/api/vehicles"
     DEFAULT_CATEGORY = "all"
+    MIN_MODEL_YEAR = 1996
     CATEGORY_TYPES = {
       "all" => [
         { query: "car", label: "Passenger Car" },
@@ -33,6 +34,7 @@ module ExternalApi
         vehicle_type_entry = vehicle_types.sample
         vehicle_type_query = vehicle_type_entry[:query]
         vehicle_type_label = vehicle_type_entry[:label]
+        model_year = random_model_year
         makes = fetch_makes_for_vehicle_type(vehicle_type_query)
         if makes.empty?
           last_error = "No makes returned for #{vehicle_type_label}"
@@ -44,12 +46,12 @@ module ExternalApi
         make_name = make["MakeName"] || make["Make_Name"]
         raise "Make name missing from NHTSA response" if make_name.to_s.strip.empty?
 
-        models = fetch_models(make_id, make_name, vehicle_type_query)
+        models = fetch_models(make_id, make_name, vehicle_type_query, model_year)
         filtered_models = filter_models(models, make_name)
 
         if filtered_models.any?
           model = filtered_models.sample
-          return normalize_model(make, model, vehicle_type_label, category)
+          return normalize_model(make, model, vehicle_type_label, category, model_year)
         end
 
         last_error = "No models returned for #{make_name} (#{vehicle_type_label})"
@@ -74,8 +76,8 @@ module ExternalApi
       body["Results"] || []
     end
 
-    def self.fetch_models(make_id, make_name, vehicle_type = nil)
-      uri = build_models_uri(make_id, make_name, vehicle_type)
+    def self.fetch_models(make_id, make_name, vehicle_type = nil, model_year = nil)
+      uri = build_models_uri(make_id, make_name, vehicle_type, model_year)
       raise "NHTSA request missing make identifier" if uri.nil?
       response = Net::HTTP.get_response(uri)
 
@@ -107,7 +109,7 @@ module ExternalApi
       body["Results"] || []
     end
 
-    def self.normalize_model(make, model, vehicle_type, category)
+    def self.normalize_model(make, model, vehicle_type, category, model_year)
       make_id = model["Make_ID"] || make["Make_ID"]
       make_name = model["Make_Name"] || make["Make_Name"]
       model_id = model["Model_ID"]
@@ -119,6 +121,7 @@ module ExternalApi
         model_id: model_id,
         model_name: model_name,
         name: [make_name, model_name].compact.join(" "),
+        model_year: model_year,
         category: category,
         vehicle_type: vehicle_type,
         raw: {
@@ -143,6 +146,12 @@ module ExternalApi
       value.to_s.downcase.gsub(/[^a-z0-9]/, "")
     end
 
+    def self.random_model_year
+      current_year = Time.now.year
+      min_year = [MIN_MODEL_YEAR, current_year].min
+      rand(min_year..current_year)
+    end
+
     def self.normalize_category(filters)
       raw =
         if filters.is_a?(Hash)
@@ -156,19 +165,20 @@ module ExternalApi
       CATEGORY_TYPES[category] || CATEGORY_TYPES[DEFAULT_CATEGORY]
     end
 
-    def self.build_models_uri(make_id, make_name, vehicle_type)
+    def self.build_models_uri(make_id, make_name, vehicle_type, model_year)
+      year = model_year || random_model_year
       if vehicle_type.to_s.strip.empty?
         return if make_id.to_s.strip.empty?
 
-        return URI("#{BASE_URL}/GetModelsForMakeId/#{make_id}?format=json")
+        return URI("#{BASE_URL}/GetModelsForMakeIdYear/makeId/#{make_id}/modelyear/#{year}?format=json")
       end
 
       encoded_type = URI.encode_www_form_component(vehicle_type)
       if make_id.to_s.strip.empty?
         encoded_name = URI.encode_www_form_component(make_name)
-        URI("#{BASE_URL}/GetModelsForMakeYear/make/#{encoded_name}/vehicletype/#{encoded_type}?format=json")
+        URI("#{BASE_URL}/GetModelsForMakeYear/make/#{encoded_name}/modelyear/#{year}/vehicletype/#{encoded_type}?format=json")
       else
-        URI("#{BASE_URL}/GetModelsForMakeIdYear/makeId/#{make_id}/vehicletype/#{encoded_type}?format=json")
+        URI("#{BASE_URL}/GetModelsForMakeIdYear/makeId/#{make_id}/modelyear/#{year}/vehicletype/#{encoded_type}?format=json")
       end
     end
 
@@ -179,8 +189,9 @@ module ExternalApi
                           :normalize_model,
                           :filter_models,
                           :normalize_string,
+                          :random_model_year,
                           :normalize_category,
-                         :category_vehicle_types,
-                         :build_models_uri
+                          :category_vehicle_types,
+                          :build_models_uri
   end
 end

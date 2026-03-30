@@ -22,7 +22,8 @@ class CarsControllerTest < ActionDispatch::IntegrationTest
       "model_name" => "318i",
       "name" => "BMW 318i",
       "category" => "passenger",
-      "vehicle_type" => "Passenger Car"
+      "vehicle_type" => "Passenger Car",
+      "model_year" => 2021
     }
 
     with_car_service_stub(return_value: payload) do
