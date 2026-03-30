@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 spec/v2.0.0.html).
 
 
+## [0.0.9] - 2026-03-30
+### Changed
+- Fetch makes by vehicle type before sampling models to reduce empty or invalid results.
+- Filtered out models that exactly match the make name.
+
 ## [0.0.8] - 2026-03-30
 ### Changed
 - Added vehicle category filtering for `/cars/random` using NHTSA vehicle types.
