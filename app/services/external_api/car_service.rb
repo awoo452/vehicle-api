@@ -8,19 +8,19 @@ module ExternalApi
     DEFAULT_CATEGORY = "all"
     CATEGORY_TYPES = {
       "all" => [
-        "Passenger Car",
-        "Multipurpose",
-        "Truck",
-        "Bus",
-        "Motorcycle",
-        "Low Speed Vehicle"
+        { query: "car", label: "Passenger Car" },
+        { query: "mpv", label: "MPV/SUV" },
+        { query: "truck", label: "Truck" },
+        { query: "bus", label: "Bus" },
+        { query: "motorcycle", label: "Motorcycle" },
+        { query: "low speed", label: "Low Speed Vehicle" }
       ],
-      "passenger" => ["Passenger Car"],
-      "mpv" => ["Multipurpose"],
-      "truck" => ["Truck"],
-      "bus" => ["Bus"],
-      "two_wheel" => ["Motorcycle"],
-      "low_speed" => ["Low Speed Vehicle"]
+      "passenger" => [{ query: "car", label: "Passenger Car" }],
+      "mpv" => [{ query: "mpv", label: "MPV/SUV" }],
+      "truck" => [{ query: "truck", label: "Truck" }],
+      "bus" => [{ query: "bus", label: "Bus" }],
+      "two_wheel" => [{ query: "motorcycle", label: "Motorcycle" }],
+      "low_speed" => [{ query: "low speed", label: "Low Speed Vehicle" }]
     }.freeze
     MAX_MODEL_ATTEMPTS = 6
 
@@ -30,10 +30,12 @@ module ExternalApi
       last_error = nil
 
       MAX_MODEL_ATTEMPTS.times do
-        vehicle_type = vehicle_types.sample
-        makes = fetch_makes_for_vehicle_type(vehicle_type)
+        vehicle_type_entry = vehicle_types.sample
+        vehicle_type_query = vehicle_type_entry[:query]
+        vehicle_type_label = vehicle_type_entry[:label]
+        makes = fetch_makes_for_vehicle_type(vehicle_type_query)
         if makes.empty?
-          last_error = "No makes returned for #{vehicle_type}"
+          last_error = "No makes returned for #{vehicle_type_label}"
           next
         end
 
@@ -42,15 +44,15 @@ module ExternalApi
         make_name = make["MakeName"] || make["Make_Name"]
         raise "Make name missing from NHTSA response" if make_name.to_s.strip.empty?
 
-        models = fetch_models(make_id, make_name, vehicle_type)
+        models = fetch_models(make_id, make_name, vehicle_type_query)
         filtered_models = filter_models(models, make_name)
 
         if filtered_models.any?
           model = filtered_models.sample
-          return normalize_model(make, model, vehicle_type, category)
+          return normalize_model(make, model, vehicle_type_label, category)
         end
 
-        last_error = "No models returned for #{make_name} (#{vehicle_type})"
+        last_error = "No models returned for #{make_name} (#{vehicle_type_label})"
       end
 
       raise last_error || "No models returned for category #{category}"
