@@ -9,7 +9,7 @@ module ExternalApi
 
     def self.random_car(filters = {})
       metadata_filters = build_metadata_filters(filters)
-      response = get("/", query: build_query(filters))
+      response = get("/", query: build_query(filters), headers: default_headers)
       payload = parse_payload(response&.body)
       trims = payload["Trims"]
 
@@ -29,7 +29,7 @@ module ExternalApi
     end
 
     def self.build_query(filters)
-      query = { cmd: "getTrims" }
+      query = { cmd: "getTrims", callback: "?" }
       fuel_type = normalize_filter(filters, :fuel_type)
       make = normalize_filter(filters, :make)
       body = normalize_filter(filters, :body)
@@ -56,6 +56,9 @@ module ExternalApi
 
       JSON.parse(json)
     rescue JSON::ParserError
+      sanitized = quote_unquoted_keys(json)
+      JSON.parse(sanitized)
+    rescue JSON::ParserError
       {}
     end
     private_class_method :parse_payload
@@ -69,6 +72,11 @@ module ExternalApi
       trimmed[start_index..end_index]
     end
     private_class_method :extract_json
+
+    def self.quote_unquoted_keys(json)
+      json.gsub(/([{,]\s*)([A-Za-z0-9_]+)\s*:/, '\\1"\\2":')
+    end
+    private_class_method :quote_unquoted_keys
 
     def self.normalize_trim(trim)
       return {} unless trim.is_a?(Hash)
@@ -120,6 +128,14 @@ module ExternalApi
       value.presence
     end
     private_class_method :normalize_filter
+
+    def self.default_headers
+      {
+        "Accept" => "application/json",
+        "User-Agent" => "vehicle-api"
+      }
+    end
+    private_class_method :default_headers
 
     def self.build_metadata_filters(filters)
       {
