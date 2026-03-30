@@ -1,6 +1,6 @@
 class CreateCars < ActiveRecord::Migration[8.1]
   def change
-    create_table :vehicle_api_cars do |t|
+    create_table :vehicle_api_vehicles do |t|
       t.string :name
       t.string :external_id
       t.string :make
@@ -14,6 +14,6 @@ class CreateCars < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :vehicle_api_cars, :external_id, unique: true
+    add_index :vehicle_api_vehicles, :external_id, unique: true
   end
 end

@@ -5,11 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 spec/v2.0.0.html).
 
 
+## [0.0.2] - 2026-03-30
+### Changed
+- Renamed the app to `vehicle-api` and updated database prefixes to `vehicle_api_`.
+- Renamed stored tables to `vehicle_api_vehicles` and updated request logs to use `vehicle_id`.
+
 ## [0.0.1] - 2026-03-30
 ### Added
 - Initial API for `GET /cars/random` with `persist=false` support.
 - CarQuery API integration via `ExternalApi::CarService`.
-- Car persistence with `vehicle_api_cars` table and request logging with `vehicle_api_request_logs`.
+- Vehicle persistence with `vehicle_api_vehicles` table and request logging with `vehicle_api_request_logs`.
 - Rate limiting for `GET /cars/random` via `RATE_LIMIT_PER_MINUTE`.
 - Legal endpoints (`/terms`, `/privacy`, `/accessibility`) backed by `config/legal_content.json`.
 - Health check endpoint at `GET /up`.

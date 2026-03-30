@@ -16,22 +16,22 @@ module Api
 
       if metadata["error"] == "no_results"
         append_request_log_metadata(
-          car: {
+          vehicle: {
             "error" => metadata["error"],
             "filters" => metadata["filters"]
           },
           persist_param: params[:persist],
-          car_id: nil
+          vehicle_id: nil
         )
 
-        return render json: { error: "No cars found for that query." }, status: :not_found
+        return render json: { error: "No vehicles found for that query." }, status: :not_found
       end
 
-      car_record = nil
+      vehicle_record = nil
       persist = params.fetch(:persist, "true").to_s.downcase != "false"
       if persist && normalized["external_id"].present?
-        car_record = Car.find_or_initialize_by(external_id: normalized["external_id"])
-        car_record.assign_attributes(
+        vehicle_record = Vehicle.find_or_initialize_by(external_id: normalized["external_id"])
+        vehicle_record.assign_attributes(
           name: normalized["name"],
           make: normalized["make"],
           model: normalized["model"],
@@ -41,12 +41,12 @@ module Api
           image_url: normalized["image_url"],
           raw_data: raw
         )
-        car_record.save
-        set_request_log_car_id(car_record.id) if car_record.persisted?
+        vehicle_record.save
+        set_request_log_vehicle_id(vehicle_record.id) if vehicle_record.persisted?
       end
 
       append_request_log_metadata(
-        car: {
+        vehicle: {
           "external_id" => normalized["external_id"],
           "name" => normalized["name"],
           "make" => normalized["make"],
@@ -58,7 +58,7 @@ module Api
           "filters" => metadata["filters"]
         },
         persist_param: params[:persist],
-        car_id: car_record&.id
+        vehicle_id: vehicle_record&.id
       )
 
       render json: {

@@ -2,25 +2,25 @@
 
 ## Features
 
-A Ruby on Rails API that fetches a random car from the CarQuery API, logs each request, and can optionally store a subset of the data in PostgreSQL.
+A Ruby on Rails API that fetches a random vehicle from the CarQuery API, logs each request, and can optionally store a subset of the data in PostgreSQL.
 
 ### API
 
-`GET /cars/random` returns a random car payload from the CarQuery API.
+`GET /cars/random` returns a random vehicle payload from the CarQuery API.
 
 Query parameters:
 - `persist=false` skips writing to the database (default persists the car).
-- `fuel_type=gas|diesel|electric` filters the random car by fuel type.
-- `make=toyota|ford|etc` filters the random car by make.
-- `body=sedan|suv|coupe` filters the random car by body style.
-- `year=YYYY` filters the random car by model year (maps to `min_year` and `max_year`).
+- `fuel_type=gas|diesel|electric` filters the random vehicle by fuel type.
+- `make=toyota|ford|etc` filters the random vehicle by make.
+- `body=sedan|suv|coupe` filters the random vehicle by body style.
+- `year=YYYY` filters the random vehicle by model year (maps to `min_year` and `max_year`).
 
 Example:
 `GET /cars/random?fuel_type=gas&make=toyota`
 
 Side effects (when `persist` is not `false`):
-- Creates or updates a `Car` record with normalized fields and the full `raw_data` payload.
-- Links the request log to the created car via `car_id`.
+- Creates or updates a `Vehicle` record with normalized fields and the full `raw_data` payload.
+- Links the request log to the created vehicle via `vehicle_id`.
 
 Request logging:
 - All API requests except `GET /up` are logged in the `request_logs` table.
@@ -50,7 +50,7 @@ The content is stored in `config/legal_content.json` and rendered by a lightweig
 
 ### Data Model
 
-Table: `vehicle_api_cars`
+Table: `vehicle_api_vehicles`
 - `name` (string)
 - `external_id` (string, unique)
 - `make` (string)
@@ -74,7 +74,7 @@ Table: `vehicle_api_request_logs`
 - `status` (integer)
 - `duration_ms` (integer)
 - `metadata` (jsonb)
-- `car_id` (foreign key, nullable)
+- `vehicle_id` (foreign key, nullable)
 - `created_at` / `updated_at`
 
 ## Setup

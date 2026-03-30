@@ -12,7 +12,7 @@ class CreateRequestLogs < ActiveRecord::Migration[8.1]
       t.integer :status
       t.integer :duration_ms
       t.jsonb :metadata
-      t.bigint :car_id
+      t.bigint :vehicle_id
 
       t.timestamps
     end
@@ -21,8 +21,8 @@ class CreateRequestLogs < ActiveRecord::Migration[8.1]
     add_index :vehicle_api_request_logs, :request_id
     add_index :vehicle_api_request_logs, :ip
     add_index :vehicle_api_request_logs, :path
-    add_index :vehicle_api_request_logs, :car_id
-    add_index :vehicle_api_request_logs, [ :car_id, :created_at ]
-    add_foreign_key :vehicle_api_request_logs, :vehicle_api_cars, column: :car_id
+    add_index :vehicle_api_request_logs, :vehicle_id
+    add_index :vehicle_api_request_logs, [ :vehicle_id, :created_at ]
+    add_foreign_key :vehicle_api_request_logs, :vehicle_api_vehicles, column: :vehicle_id
   end
 end
