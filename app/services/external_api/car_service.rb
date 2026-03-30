@@ -8,10 +8,11 @@ module ExternalApi
 
     def self.random_vehicle
       make = random_make
+      make_id = make["Make_ID"]
       make_name = make["Make_Name"]
       raise "Make name missing from NHTSA response" if make_name.to_s.strip.empty?
 
-      models = fetch_models(make_name)
+      models = fetch_models(make_id, make_name)
       raise "No models returned for #{make_name}" if models.empty?
 
       model = models.sample
@@ -34,9 +35,14 @@ module ExternalApi
       body["Results"] || []
     end
 
-    def self.fetch_models(make_name)
-      encoded_name = URI.encode_www_form_component(make_name)
-      uri = URI("#{BASE_URL}/getmodelsformake/#{encoded_name}?format=json")
+    def self.fetch_models(make_id, make_name)
+      uri =
+        if make_id.to_s.strip.empty?
+          encoded_name = URI.encode_www_form_component(make_name)
+          URI("#{BASE_URL}/getmodelsformake/#{encoded_name}?format=json")
+        else
+          URI("#{BASE_URL}/getmodelsformakeid/#{make_id}?format=json")
+        end
       response = Net::HTTP.get_response(uri)
 
       unless response.is_a?(Net::HTTPSuccess)
