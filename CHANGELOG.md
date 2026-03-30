@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 spec/v2.0.0.html).
 
 
+## [0.0.4] - 2026-03-30
+### Changed
+- Switched CarQuery requests to HTTP and added upstream error handling for `/cars/random`.
+
 ## [0.0.3] - 2026-03-30
 ### Changed
 - Hardened CarQuery parsing to handle JSONP/unquoted keys and added a default callback param.

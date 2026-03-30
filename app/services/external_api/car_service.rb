@@ -4,7 +4,7 @@ require "json"
 module ExternalApi
   class CarService
     include HTTParty
-    base_uri "https://www.carqueryapi.com/api/0.3"
+    base_uri "http://www.carqueryapi.com/api/0.3"
     default_timeout 5
 
     def self.random_car(filters = {})
@@ -26,6 +26,8 @@ module ExternalApi
           "filters" => metadata_filters
         }
       }
+    rescue StandardError => e
+      fallback_error(e, metadata_filters)
     end
 
     def self.build_query(filters)
@@ -159,5 +161,18 @@ module ExternalApi
       }
     end
     private_class_method :fallback_empty
+
+    def self.fallback_error(error, metadata_filters)
+      {
+        "raw" => {},
+        "normalized" => {},
+        "metadata" => {
+          "error" => "upstream_error",
+          "message" => error.message,
+          "filters" => metadata_filters
+        }
+      }
+    end
+    private_class_method :fallback_error
   end
 end

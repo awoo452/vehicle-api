@@ -14,17 +14,20 @@ module Api
       raw = result["raw"]
       metadata = result["metadata"] || {}
 
-      if metadata["error"] == "no_results"
+      if metadata["error"].present?
         append_request_log_metadata(
           vehicle: {
             "error" => metadata["error"],
+            "message" => metadata["message"],
             "filters" => metadata["filters"]
           },
           persist_param: params[:persist],
           vehicle_id: nil
         )
 
-        return render json: { error: "No vehicles found for that query." }, status: :not_found
+        message = metadata["error"] == "no_results" ? "No vehicles found for that query." : "Unable to reach the vehicle data source."
+        status = metadata["error"] == "no_results" ? :not_found : :bad_gateway
+        return render json: { error: message }, status: status
       end
 
       vehicle_record = nil
