@@ -2,7 +2,7 @@
 module Api
   class CarsController < ApplicationController
     def random
-      vehicle = ExternalApi::CarService.random_vehicle
+      vehicle = ExternalApi::CarService.random_vehicle(category: params[:category])
 
       render json: vehicle
     rescue => e

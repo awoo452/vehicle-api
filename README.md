@@ -7,10 +7,14 @@ A Ruby on Rails API that fetches a random vehicle model (make + model) from the 
 ### API
 
 `GET /cars/random` returns a random vehicle model payload from the NHTSA Vehicle API.
-Response includes `make_name`, `model_name`, `model_id`, and a combined `name` field.
+Response includes `make_name`, `model_name`, `model_id`, `vehicle_type`, `category`, and a combined `name` field.
 
 Example:
 `GET /cars/random`
+
+Query parameters:
+- `category=all|passenger|mpv|truck|bus|two_wheel|low_speed` (default: `all`)
+  - `all` is a curated set of common road vehicle groups (trailers excluded).
 
 Request logging:
 - All API requests except `GET /up` are logged in the `request_logs` table.
