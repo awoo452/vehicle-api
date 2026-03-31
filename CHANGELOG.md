@@ -7,6 +7,7 @@ spec/v2.0.0.html).
 ## [0.0.14] - 2026-03-30
 ### Changed
 - Added a random model year to `/cars/random` responses.
+- Expanded upstream error reporting for NHTSA failures, including response details in request logs.
 
 ## [0.0.13] - 2026-03-30
 ### Changed

@@ -5,6 +5,11 @@ module Api
       vehicle = ExternalApi::CarService.random_vehicle(category: params[:category])
 
       render json: vehicle
+    rescue ExternalApi::UpstreamError => e
+      append_request_log_metadata("upstream" => e.metadata)
+      Rails.logger.error("[CarsController] Upstream failure #{e.log_message}")
+
+      render json: { error: "Upstream failure" }, status: :bad_gateway
     rescue => e
       Rails.logger.error("[CarsController] #{e.message}")
 

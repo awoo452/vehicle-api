@@ -5,6 +5,7 @@ require "json"
 module ExternalApi
   class CarService
     BASE_URL = "https://vpic.nhtsa.dot.gov/api/vehicles"
+    UPSTREAM_SERVICE = "NHTSA"
     DEFAULT_CATEGORY = "all"
     MIN_MODEL_YEAR = 1996
     CATEGORY_TYPES = {
@@ -30,12 +31,19 @@ module ExternalApi
       vehicle_types = category_vehicle_types(category)
       last_error = nil
 
-      MAX_MODEL_ATTEMPTS.times do
+      MAX_MODEL_ATTEMPTS.times do |attempt|
         vehicle_type_entry = vehicle_types.sample
         vehicle_type_query = vehicle_type_entry[:query]
         vehicle_type_label = vehicle_type_entry[:label]
         model_year = random_model_year
-        makes = fetch_makes_for_vehicle_type(vehicle_type_query)
+        context = {
+          "category" => category,
+          "vehicle_type_query" => vehicle_type_query,
+          "vehicle_type_label" => vehicle_type_label,
+          "model_year" => model_year,
+          "attempt" => attempt + 1
+        }
+        makes = fetch_makes_for_vehicle_type(vehicle_type_query, context: context)
         if makes.empty?
           last_error = "No makes returned for #{vehicle_type_label}"
           next
@@ -46,7 +54,16 @@ module ExternalApi
         make_name = make["MakeName"] || make["Make_Name"]
         raise "Make name missing from NHTSA response" if make_name.to_s.strip.empty?
 
-        models = fetch_models(make_id, make_name, vehicle_type_query, model_year)
+        models = fetch_models(
+          make_id,
+          make_name,
+          vehicle_type_query,
+          model_year,
+          context: context.merge(
+            "make_id" => make_id,
+            "make_name" => make_name
+          )
+        )
         filtered_models = filter_models(models, make_name)
 
         if filtered_models.any?
@@ -64,28 +81,16 @@ module ExternalApi
       random_vehicle(filters)
     end
 
-    def self.fetch_makes
+    def self.fetch_makes(context: {})
       uri = URI("#{BASE_URL}/getallmakes?format=json")
-      response = Net::HTTP.get_response(uri)
-
-      unless response.is_a?(Net::HTTPSuccess)
-        raise "NHTSA failed: #{response.code}"
-      end
-
-      body = JSON.parse(response.body)
+      body = fetch_json(uri, context: context)
       body["Results"] || []
     end
 
-    def self.fetch_models(make_id, make_name, vehicle_type = nil, model_year = nil)
+    def self.fetch_models(make_id, make_name, vehicle_type = nil, model_year = nil, context: {})
       uri = build_models_uri(make_id, make_name, vehicle_type, model_year)
       raise "NHTSA request missing make identifier" if uri.nil?
-      response = Net::HTTP.get_response(uri)
-
-      unless response.is_a?(Net::HTTPSuccess)
-        raise "NHTSA failed: #{response.code}"
-      end
-
-      body = JSON.parse(response.body)
+      body = fetch_json(uri, context: context)
       body["Results"] || []
     end
 
@@ -96,16 +101,10 @@ module ExternalApi
       makes.sample
     end
 
-    def self.fetch_makes_for_vehicle_type(vehicle_type)
+    def self.fetch_makes_for_vehicle_type(vehicle_type, context: {})
       encoded_type = URI.encode_www_form_component(vehicle_type)
       uri = URI("#{BASE_URL}/GetMakesForVehicleType/#{encoded_type}?format=json")
-      response = Net::HTTP.get_response(uri)
-
-      unless response.is_a?(Net::HTTPSuccess)
-        raise "NHTSA failed: #{response.code}"
-      end
-
-      body = JSON.parse(response.body)
+      body = fetch_json(uri, context: context.merge("vehicle_type" => vehicle_type))
       body["Results"] || []
     end
 
@@ -182,6 +181,73 @@ module ExternalApi
       end
     end
 
+    def self.fetch_json(uri, context:)
+      response = Net::HTTP.get_response(uri)
+      unless response.is_a?(Net::HTTPSuccess)
+        raise_upstream_error(
+          "NHTSA failed: #{response.code} #{response.message}",
+          response,
+          uri,
+          context
+        )
+      end
+
+      JSON.parse(response.body)
+    rescue ExternalApi::UpstreamError
+      raise
+    rescue JSON::ParserError => e
+      raise_upstream_error(
+        "NHTSA returned invalid JSON",
+        response,
+        uri,
+        context.merge("parse_error" => e.message)
+      )
+    rescue StandardError => e
+      raise ExternalApi::UpstreamError.new(
+        message: "NHTSA request failed: #{e.class}",
+        service: UPSTREAM_SERVICE,
+        status: nil,
+        method: "GET",
+        url: uri.to_s,
+        response_body: nil,
+        context: normalize_context(context).merge(
+          "network_error" => {
+            "class" => e.class.name,
+            "message" => e.message
+          }
+        )
+      )
+    end
+
+    def self.raise_upstream_error(message, response, uri, context)
+      raise ExternalApi::UpstreamError.new(
+        message: message,
+        service: UPSTREAM_SERVICE,
+        status: response&.code&.to_i,
+        method: "GET",
+        url: uri.to_s,
+        response_body: response_body_excerpt(response&.body),
+        context: normalize_context(context).merge(
+          "response_message" => response&.message,
+          "response_code" => response&.code
+        )
+      )
+    end
+
+    def self.response_body_excerpt(body)
+      text = body.to_s
+      return if text.strip.empty?
+
+      excerpt = text[0, 500]
+      excerpt.encode("UTF-8", invalid: :replace, undef: :replace, replace: "?")
+    end
+
+    def self.normalize_context(context)
+      context.each_with_object({}) do |(key, value), normalized|
+        normalized[key.to_s] = value
+      end
+    end
+
     private_class_method :fetch_makes,
                           :fetch_models,
                           :random_make,
@@ -192,6 +258,10 @@ module ExternalApi
                           :random_model_year,
                           :normalize_category,
                           :category_vehicle_types,
-                          :build_models_uri
+                          :build_models_uri,
+                          :fetch_json,
+                          :raise_upstream_error,
+                          :response_body_excerpt,
+                          :normalize_context
   end
 end
