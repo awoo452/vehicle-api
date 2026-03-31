@@ -13,7 +13,7 @@ Example:
 `GET /cars/random`
 
 Query parameters:
-- `category=all|passenger|mpv|truck|bus|two_wheel|low_speed` (default: `all`)
+- `category=all|passenger|mpv|truck|bus|two_wheel` (default: `all`)
   - `all` is a curated set of common road vehicle groups (trailers excluded).
 
 Request logging:

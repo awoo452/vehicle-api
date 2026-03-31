@@ -14,15 +14,13 @@ module ExternalApi
         { query: "mpv", label: "MPV/SUV" },
         { query: "truck", label: "Truck" },
         { query: "bus", label: "Bus" },
-        { query: "motorcycle", label: "Motorcycle" },
-        { query: "low speed vehicle", label: "Low Speed Vehicle" }
+        { query: "motorcycle", label: "Motorcycle" }
       ],
       "passenger" => [{ query: "car", label: "Passenger Car" }],
       "mpv" => [{ query: "mpv", label: "MPV/SUV" }],
       "truck" => [{ query: "truck", label: "Truck" }],
       "bus" => [{ query: "bus", label: "Bus" }],
-      "two_wheel" => [{ query: "motorcycle", label: "Motorcycle" }],
-      "low_speed" => [{ query: "low speed vehicle", label: "Low Speed Vehicle" }]
+      "two_wheel" => [{ query: "motorcycle", label: "Motorcycle" }]
     }.freeze
     MAX_MODEL_ATTEMPTS = 6
 
