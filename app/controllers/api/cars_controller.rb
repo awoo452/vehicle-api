@@ -9,7 +9,11 @@ module Api
       append_request_log_metadata("upstream" => e.metadata)
       Rails.logger.error("[CarsController] Upstream failure #{e.log_message}")
 
-      render json: { error: "Upstream failure" }, status: :bad_gateway
+      render json: {
+        error: "Upstream failure",
+        upstream: e.metadata,
+        request_id: request.request_id
+      }, status: :bad_gateway
     rescue => e
       Rails.logger.error("[CarsController] #{e.message}")
 
