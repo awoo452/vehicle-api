@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/
 spec/v2.0.0.html).
 
+## [0.0.19] - 2026-07-20
+### Security
+- Ran `bundler-audit`, which was failing in CI on `main`. Bumped: `puma` 7.2.0 → 8.0.2 (CVE-2026-47737, High — PROXY protocol v1 accepts repeated headers on persistent connections; this app had never gotten this bump since it had no dependabot config until this same day), `brakeman` 8.0.4 → 8.0.5, `rack` 3.2.5 → 3.2.6 (multipart parsing DoS/host-spoofing/directory disclosure family), `nokogiri` 1.19.2 → 1.19.4 (multiple use-after-free/out-of-bounds advisories), `rack-session` 2.1.1 → 2.1.2 (GHSA-33qg-7wpp-89cq, secretless session forgery fallback), `loofah` 2.25.1 → 2.25.2, `rails-html-sanitizer` 1.7.0 → 1.7.1 (possible XSS), `crass` 1.0.6 → 1.0.7 (four CSS-parsing DoS advisories), `mcp` 0.10.0 → 0.25.0 (five advisories: memory exhaustion, session poisoning, DNS-rebinding), `websocket-driver` 0.8.0 → 0.8.2 (four advisories), `net-imap` 0.6.3 → 0.6.4.1 (six advisories, dev-only via rubocop/brakeman toolchain), `addressable` 2.8.9 → 2.9.0 (ReDoS), `concurrent-ruby` 1.3.6 → 1.3.8, `msgpack` 1.8.0 → 1.8.3 (use-after-free), `json` 2.19.3 → 2.21.1, `erb` 6.0.2 → 6.0.6 (deserialization guard bypass). `bundler-audit check` and `brakeman` both clean afterward.
+
 ## [0.0.18] - 2026-07-20
 ### Added
 - `.github/dependabot.yml` — this repo had no dependabot config at all, unlike its sibling APIs (pokemon-api, lego-api), which is why it showed zero open dependency PRs despite being the most out-of-date of the three (`puma` 7.2.0 vs 8.0.2 elsewhere, `brakeman` 8.0.4 vs 8.0.5). Weekly bundler + github-actions update checks, matching the other two repos exactly.
