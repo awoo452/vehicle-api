@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/
 spec/v2.0.0.html).
 
+## [0.0.18] - 2026-07-20
+### Added
+- `.github/dependabot.yml` — this repo had no dependabot config at all, unlike its sibling APIs (pokemon-api, lego-api), which is why it showed zero open dependency PRs despite being the most out-of-date of the three (`puma` 7.2.0 vs 8.0.2 elsewhere, `brakeman` 8.0.4 vs 8.0.5). Weekly bundler + github-actions update checks, matching the other two repos exactly.
+
 ## [0.0.17] - 2026-03-30
 ### Changed
 - Removed the low-speed category because the NHTSA endpoint does not support it.
