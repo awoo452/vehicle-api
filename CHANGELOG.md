@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/
 spec/v2.0.0.html).
 
+## [0.0.21] - 2026-11-18
+PM-061 — Rails 8.1.4.1 security bump in every app
+### Fixed
+- `Gemfile.lock`: Rails 8.1.4 to 8.1.4.1 clears Action Dispatch RemoteIp spoofing (GHSA-2gff-2mmg-m73p).
+- `Gemfile.lock`: rails-html-sanitizer 1.7.2, loofah 2.25.3, and nokogiri 1.19.7, which Rails 8.1.4.1 requires.
+- `Gemfile.lock`: puma 8.1.2 clears five worker hang and exhaustion advisories (GHSA-jm4r-w4xx-qxw7, GHSA-m5xw-3hrw-qcmf, GHSA-rf6g-xhmp-gm7v, GHSA-x646-wp7c-h9mg, GHSA-xw3h-pgr9-3vg7).
+- `Gemfile.lock`: puma 8.1.2 clears pumactl TLS identity and cipher-filter advisories (GHSA-86xc-wrr9-xmmq, GHSA-r885-m39c-939g).
+- `Gemfile.lock`: msgpack 1.8.7 clears uncapped JRuby header allocations (CVE-2026-126366).
+- `Gemfile.lock`: addressable 2.9.2 clears template ReDoS, URI normalization, and misleading-host advisories.
+- `Gemfile.lock`: crass 1.0.8 clears the CSS sanitizer bypass (GHSA-pq4g-8rxf-4g29).
+- `Gemfile.lock`: rack 3.2.8 clears multipart memory exhaustion (GHSA-5v64-555j-wjxm).
+- `Gemfile.lock`: rack 3.2.8 clears boundary and static-path bypasses (GHSA-p8x9-v4hv-2w4g, GHSA-wvg4-6p58-3gh3).
+- `Gemfile.lock`: rack 3.2.8 clears invalid Host handling (GHSA-2j8w-xcrc-x985).
+- `Gemfile.lock`: mcp 1.10.0 clears the OAuth discovery SSRF (GHSA-4m5j-jjfc-97gx).
+- `Gemfile.lock`: rubocop 1.92.3 drops its `mcp ~> 0.6` pin, so mcp can move.
+### Added
+- `Gemfile.lock`: the aarch64-linux platform, for the Raspberry Pi development machines.
+- `Gemfile.lock`: aarch64 nokogiri and pg binaries for that platform.
+### Changed
+- `.github/workflows/ci.yml`: every job runs on Ubuntu 24.04; ubuntu-latest has no Ruby 4.0.2.
+- `.github/workflows/ci.yml`: every job has a time limit.
+- `.github/workflows/ci.yml`: checkout v7 and cache v6.
+- `.github/workflows/ci.yml`: the gem scan runs `bin/bundler-audit check --update`.
+- `.github/workflows/ci.yml`: the JavaScript scan always runs its skip step; the app has no `bin/importmap`.
+### Removed
+- `.github/workflows/ci.yml`: the importmap audit step, which never ran without `bin/importmap`.
+
 ## [0.0.20] - 2026-09-11
 ### Added
 - `CLAUDE.md`: points agents at the Rails Playbook, lists the rules broken most often, and says which of the playbook's `hosting/` notes apply here.
